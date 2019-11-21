@@ -16,6 +16,10 @@ router.get("/categories/:categoryid", shopController.getProductsByCategoryId);
 
 router.get("/cart", shopController.getCart);
 
+router.post("/cart", shopController.postCart);
+
+router.post("/delete-cartitem", shopController.postCartItemDelete);
+
 router.get("/orders", shopController.getOrders);
 
 module.exports = router;

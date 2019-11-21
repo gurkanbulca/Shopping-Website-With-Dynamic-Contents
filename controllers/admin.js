@@ -25,7 +25,7 @@ exports.getProducts = (req, res, next) => {
 };
 
 exports.getAddProduct = (req, res, next) => {
-    
+
     Category.findAll()
         .then((categories) => {
             res.render("admin/add-product", {
@@ -39,36 +39,39 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
-    
+
     const name = req.body.name;
     const price = req.body.price;
     const imageUrl = req.body.imageUrl;
     const categoryid = req.body.categoryid;
     const description = req.body.description;
-    
-    Product.create({
+    const user = req.user;
+
+    user.getProducts
+
+    user.createProduct({
         name: name,
         price: price,
         imageUrl: imageUrl,
         description: description,
-        categoryId: categoryid
+        categoryId: categoryid,
     })
         .then((result) => {
-            console.log(result);
+            //console.log(result);
             res.redirect("/admin/products?action=add");
         }).catch((err) => {
             console.log(err);
         });
-    
 
-    
+
+
 
 };
 
 exports.getEditProduct = (req, res, next) => {
     Product.findByPk(req.params.productid)
         .then((product) => {
-            if(!product){
+            if (!product) {
                 return res.redirect('/');
             }
             Category.findAll()
@@ -87,7 +90,7 @@ exports.getEditProduct = (req, res, next) => {
         }).catch((err) => {
 
         });
-        
+
 };
 
 exports.postEditProduct = (req, res, next) => {
@@ -102,14 +105,14 @@ exports.postEditProduct = (req, res, next) => {
 
     Product.findByPk(id)
         .then((product) => {
-            product.name=name;
-            product.price=price;
-            product.description=description;
-            product.imageUrl=imageUrl;
-            product.categoryid=categoryid;
+            product.name = name;
+            product.price = price;
+            product.description = description;
+            product.imageUrl = imageUrl;
+            product.categoryid = categoryid;
             return product.save()
         })
-        .then(result=>{
+        .then(result => {
             console.log('updated');
             res.redirect("/admin/products?action=edit");
         })
@@ -130,7 +133,7 @@ exports.postDeleteProduct = (req, res, next) => {
         .then((product) => {
             return product.destroy();
         })
-        .then(()=>{
+        .then(() => {
             console.log("Product has been deleted.");
             res.redirect("/admin/products?action=delete");
         })
@@ -145,6 +148,6 @@ exports.postDeleteProduct = (req, res, next) => {
         console.log(err);
     });
     */
-    
+
 
 }

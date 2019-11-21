@@ -19,6 +19,10 @@ const sequileze = require("./utility/database");
 
 const Category = require('./models/category');
 const Product = require('./models/product');
+const User = require('./models/user');
+const Cart = require('./models/cart');
+const CartItem = require('./models/cartItem');
+
 
 
 app.use(bodyParser.urlencoded({
@@ -26,34 +30,79 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use((req, res, next) => {
+    User.findByPk(1)
+        .then((user) => {
+            req.user = user;
+            next();
+        }).catch((err) => {
+            console.log(err);
+        });
+})
+
 // routes
 app.use("/admin", adminRoutes);
 app.use(userRoutes);
 
+
+
 app.use(errorsController.get404Page);
 
 // Product.hasOne(Category); Aynısı
-Product.belongsTo(Category, {
-    foreignKey: {
-        allowNull: false
-    }
-});
-Category.hasMany(Product)
+Product.belongsTo(Category, { foreignKey: { allowNull: false } });
+Category.hasMany(Product);
+
+Product.belongsTo(User);
+User.hasMany(Product);
+
+User.hasOne(Cart);
+Cart.belongsTo(User);
+
+Cart.belongsToMany(Product, { through: CartItem });
+Product.belongsToMany(Cart, { through: CartItem });
+
+let _user;
 
 sequileze
-    // .sync({ force: true })
+    //.sync({ force: true })
     .sync()
     .then(() => {
-        Category.count()
-            .then(count => {
-                if (count === 0) {
-                    Category.bulkCreate([
-                        { name: 'Telefon', description: 'telefon kategorisi' },
-                        { name: 'Bilgisayar', description: 'bilgisayar kategorisi' },
-                        { name: 'Elektronik', description: 'elektronik kategorisi' },
-                    ]);
+        User.findByPk(1)
+            .then((user) => {
+                if (!user) {
+                    return User.create({ name: 'gurkanbulca', email: 'email@gmail.com' });
                 }
+                return user;
             })
+            .then(user => {
+                _user = user;
+                return user.getCart();
+
+
+            })
+            .then(cart => {
+                if (!cart) {
+                    return _user.createCart();
+                }
+                return cart;
+            })
+            .then(() => {
+                Category.count()
+                    .then(count => {
+                        if (count === 0) {
+                            Category.bulkCreate([
+                                { name: 'Telefon', description: 'telefon kategorisi' },
+                                { name: 'Bilgisayar', description: 'bilgisayar kategorisi' },
+                                { name: 'Elektronik', description: 'elektronik kategorisi' },
+                            ]);
+                        }
+                    });
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+
+
 
     }).catch(err => {
         console.log(err);
