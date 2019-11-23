@@ -1,13 +1,12 @@
 extends ../layouts/main-layout.pug
 
+block content   
 
-block content
-
-    if orders.length > 0
+    if orders.length > 0 
         each order in orders
             .card.mb-5
                 .card-header
-                    h3 order id ##{order.id}
+                    h3 order id: ##{order.id}
                 table.table
                     thead
                         tr
@@ -19,22 +18,20 @@ block content
                         each product in order.products
                             tr
                                 td
-                                    img(src=`/img/${product.imageUrl}` width = '80')
+                                    img(src=`/img/${product.imageUrl}` width="80")
                                 td #{product.name}
                                 td #{product.orderItem.quantity}
                                 td #{product.orderItem.price}
                     tfoot
                         tr
-                            td(colspan='2') #{order.createdAt.toDateString()}
+                            td(colspan="2") #{order.createdAt.toDateString()}
                             td
-                                - var total = 0;
-                                each product in order.products
-                                    - total +=(product.orderItem.price * product.orderItem.quantity)
+                            - var total = 0;
+                            each product in order.products
+                                - total += (product.price * product.orderItem.quantity)
+                            td  #{total} TL
 
-                            td(style="font-weight:bold;") Toplam:
-                            td  #{total} tl
-
-
+                
 
 
     else

@@ -1,121 +1,58 @@
-const express = require("express");
+const express = require('express');
 const app = express();
 
+const bodyParser = require('body-parser');
 const path = require('path');
 
-app.set("view engine", "pug");
-app.set("views", "./views"); // default
+app.set('view engine', 'pug');
+app.set('views', './views');
 
+const adminRoutes = require('./routes/admin');
+const userRoutes = require('./routes/shop');
 
-const bodyParser = require("body-parser");
+const errorController = require('./controllers/errors');
+const mongoConnect = require('./utility/database').mongoConnect;
 
-
-const adminRoutes = require("./routes/admin");
-const userRoutes = require("./routes/shop");
-
-
-const errorsController = require("./controllers/errors");
-const sequileze = require("./utility/database");
-
-const Category = require('./models/category');
-const Product = require('./models/product');
 const User = require('./models/user');
-const Cart = require('./models/cart');
-const CartItem = require('./models/cartItem');
-const Order = require('./models/order');
-const OrderItem = require('./models/orderItem');
 
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.static(path.join(__dirname, 'public')));
 
-
-app.use(bodyParser.urlencoded({
-    extended: false
-}));
-app.use(express.static(path.join(__dirname, "public")));
-
-app.use((req, res, next) => {
-    User.findByPk(1)
-        .then((user) => {
-            req.user = user;
+app.use((req,res,next)=>{
+    User.findByUserName('gurkanbulca')
+        .then(user =>{
+            req.user = new User(user.name,user.email,user._id);
             next();
-        }).catch((err) => {
-            console.log(err);
-        });
+        })
+        .catch(err=>console.log(err));
 })
 
-// routes
-app.use("/admin", adminRoutes);
+app.use('/admin', adminRoutes);
 app.use(userRoutes);
 
-
-
-app.use(errorsController.get404Page);
-
-// Product.hasOne(Category); Aynısı
-Product.belongsTo(Category, { foreignKey: { allowNull: false } });
-Category.hasMany(Product);
-
-Product.belongsTo(User);
-User.hasMany(Product);
-
-User.hasOne(Cart);
-Cart.belongsTo(User);
-
-Cart.belongsToMany(Product, { through: CartItem });
-Product.belongsToMany(Cart, { through: CartItem });
-
-User.hasMany(Order);
-Order.belongsTo(User);
-
-Order.belongsToMany(Product, { through: OrderItem });
-Product.belongsToMany(Order, { through: OrderItem });
-
-let _user;
-
-sequileze
-    // .sync({ force: true })
-    .sync()
-    .then(() => {
-        User.findByPk(1)
-            .then((user) => {
-                if (!user) {
-                    return User.create({ name: 'gurkanbulca', email: 'email@gmail.com' });
-                }
-                return user;
-            })
-            .then(user => {
-                _user = user;
-                return user.getCart();
-
-
-            })
-            .then(cart => {
-                if (!cart) {
-                    return _user.createCart();
-                }
-                return cart;
-            })
-            .then(() => {
-                Category.count()
-                    .then(count => {
-                        if (count === 0) {
-                            Category.bulkCreate([
-                                { name: 'Telefon', description: 'telefon kategorisi' },
-                                { name: 'Bilgisayar', description: 'bilgisayar kategorisi' },
-                                { name: 'Elektronik', description: 'elektronik kategorisi' },
-                            ]);
-                        }
-                    });
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+app.use(errorController.get404Page);
 
 
 
-    }).catch(err => {
-        console.log(err);
-    });
 
-app.listen(3000, () => {
-    console.log("Listening on port 3000");
+mongoConnect(() => {
+
+    User.findByUserName('gurkanbulca')
+        .then(user=>{
+            if(!user){
+                user = new User('gurkanbulca','email@gurkanbulca.com');
+                return user.save();
+            }
+            return user;
+        })
+        .then(user=>{
+            console.log(user);
+            app.listen(3000);
+        })
+        .catch(err=>console.log(err));
+
+
+
+    
 });
+
