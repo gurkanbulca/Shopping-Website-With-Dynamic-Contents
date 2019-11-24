@@ -2,11 +2,12 @@ const getDb = require('../utility/database').getdb;
 const mongodb = require('mongodb');
 
 class Product {
-    constructor(name, price, description, imageUrl, id, userId) {
+    constructor(name, price, description, imageUrl, categories, id, userId) {
         this.name = name;
         this.price = price;
         this.description = description;
         this.imageUrl = imageUrl;
+        this.categories = (categories && !Array.isArray(categories)) ? Array.of(categories) : categories;
         this._id = id ? new mongodb.ObjectID(id) : null;
         this.userId = userId;
     }
@@ -50,6 +51,20 @@ class Product {
             .catch(err => console.log(err));
 
 
+    }
+
+    static findByCategoryId(categoryid) {
+        const db = getDb();
+        return db.collection('products')
+            .find({
+                categories: categoryid
+
+            })
+            .toArray()
+            .then(products => {
+                return products;
+            })
+            .catch(err => console.log(err));
     }
 
     static deleteById(productid) {
