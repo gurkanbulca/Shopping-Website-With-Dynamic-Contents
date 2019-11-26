@@ -3,21 +3,27 @@ const Category = require('../models/category');
 
 exports.getIndex = (req, res, next) => {
 
-    Product.findAll()
+    Product.find()
         .then(products => {
+            res.render('shop/index', {
+                title: 'Shopping',
+                products: products,
+                path: '/'
+            });
 
-            Category.findAll()
-                .then(categories => {
-                    res.render('shop/index', {
-                        title: 'Shopping',
-                        products: products,
-                        categories: categories,
-                        path: '/'
-                    });
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
+
+            // Category.find()
+            //     .then(categories => {
+            //         res.render('shop/index', {
+            //             title: 'Shopping',
+            //             products: products,
+            //             categories: categories,
+            //             path: '/'
+            //         });
+            //     })
+            //     .catch((err) => {
+            //         console.log(err);
+            //     });
         })
         .catch((err) => {
             console.log(err);
@@ -25,13 +31,36 @@ exports.getIndex = (req, res, next) => {
 }
 
 exports.getProducts = (req, res, next) => {
+    // eq (equal)
+    // ne (not equal)
+    // gt (greater than)
+    // gte (greater than or equal)
+    // lt (less than)
+    // lte (less than or equal)
+    // in 
+    // nin (not in)
 
-    Product.findAll({
-        attributes: ['id', 'name', 'price', 'imageUrl'],
-    })
+
+    Product
+        .find()
+        // .find({price: {$eq: 2000}})
+        // .find({price: {$ne: 2000}})
+        // .find({price: {$gt: 2000}})
+        // .find({price: {$gte: 2000}})
+        // .find({price: {$lt: 2000}})
+        // .find({price: {$eq: 2000}})
+        // .find({price: {$in: [1000,2000,3000]}})
+        // .find({price: {$nin: [1000,2000,3000]}})
+        // .find({ price: { $gte: 1000, $lte: 2000 } })
+        // .find({price: {$gt: 2000},name:'Samsung S6'})
+        // .or([{price: {$gt: 2000},name:'Samsung S6'}])
+        // .find({name:/^Samsung/}) starts with
+        // .find({name:/Samsung$/}) ends with
+        // .find({ name: /.*Samsung.*/ }) contains
+
         .then(products => {
 
-            Category.findAll()
+            Category.find()
                 .then(categories => {
                     res.render('shop/products', {
                         title: 'Products',
@@ -55,7 +84,7 @@ exports.getProductsByCategoryId = (req, res, next) => {
 
     Product.findByCategoryId(categoryid)
         .then(products => {
-            Category.findAll()
+            Category.find()
                 .then(categories => {
                     res.render('shop/products', {
                         title: 'Products',
@@ -105,7 +134,9 @@ exports.getCart = (req, res, next) => {
 exports.postCart = (req, res, next) => {
 
     const productId = req.body.productId;
-    Product.findById(productId)
+    Product
+        //.findById(productId)
+        .findOne({ _id: req.params.productid })
         .then(product => {
             return req.user.addToCart(product);
         })
