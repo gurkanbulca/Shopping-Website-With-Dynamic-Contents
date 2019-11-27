@@ -17,6 +17,7 @@ block content
                     th(style="width:100px;") Image
                     th Product Name
                     th(style="width:150px;") Price
+                    th
                     th(style="width:133px;")
             tbody
                 each product in products
@@ -25,6 +26,7 @@ block content
                             img(src=`/img/${product.imageUrl}` width='80')
                         td #{product.name}
                         td #{product.price} TL
+                        td #{product.userId.name}
                         td
                             .row
 

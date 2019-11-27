@@ -6,7 +6,18 @@ const productSchema = mongoose.Schema({
     description: String,
     imageUrl: String,
     date: { type: Date, default: Date.now },
-    tags: [String]
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    categories: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Category',
+            required: true
+        }
+    ]
 });
 
 module.exports = mongoose.model('Product', productSchema);

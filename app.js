@@ -49,9 +49,6 @@ mongoose.connect('mongodb://localhost/node-app')
                     user = new User({
                         name: 'gurkanbulca',
                         email: 'email@gmail.com',
-                        cart: {
-                            items: []
-                        }
                     });
                     return user.save();
                 }

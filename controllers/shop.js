@@ -1,15 +1,44 @@
 const Product = require('../models/product');
 const Category = require('../models/category');
 
+
+// eq (equal)
+// ne (not equal)
+// gt (greater than)
+// gte (greater than or equal)
+// lt (less than)
+// lte (less than or equal)
+// in 
+// nin (not in)
+// .find({price: {$eq: 2000}})
+// .find({price: {$ne: 2000}})
+// .find({price: {$gt: 2000}})
+// .find({price: {$gte: 2000}})
+// .find({price: {$lt: 2000}})
+// .find({price: {$eq: 2000}})
+// .find({price: {$in: [1000,2000,3000]}})
+// .find({price: {$nin: [1000,2000,3000]}})
+// .find({ price: { $gte: 1000, $lte: 2000 } })
+// .find({price: {$gt: 2000},name:'Samsung S6'})
+// .or([{price: {$gt: 2000},name:'Samsung S6'}])
+// .find({name:/^Samsung/}) starts with
+// .find({name:/Samsung$/}) ends with
+// .find({ name: /.*Samsung.*/ }) contains
+
 exports.getIndex = (req, res, next) => {
 
     Product.find()
         .then(products => {
-            res.render('shop/index', {
-                title: 'Shopping',
-                products: products,
-                path: '/'
-            });
+            Category.find()
+                .then(categories => {
+                    res.render('shop/index', {
+                        title: 'Shopping',
+                        products: products,
+                        categories: categories,
+                        path: '/'
+                    });
+                })
+
 
 
             // Category.find()
@@ -31,35 +60,11 @@ exports.getIndex = (req, res, next) => {
 }
 
 exports.getProducts = (req, res, next) => {
-    // eq (equal)
-    // ne (not equal)
-    // gt (greater than)
-    // gte (greater than or equal)
-    // lt (less than)
-    // lte (less than or equal)
-    // in 
-    // nin (not in)
 
 
     Product
         .find()
-        // .find({price: {$eq: 2000}})
-        // .find({price: {$ne: 2000}})
-        // .find({price: {$gt: 2000}})
-        // .find({price: {$gte: 2000}})
-        // .find({price: {$lt: 2000}})
-        // .find({price: {$eq: 2000}})
-        // .find({price: {$in: [1000,2000,3000]}})
-        // .find({price: {$nin: [1000,2000,3000]}})
-        // .find({ price: { $gte: 1000, $lte: 2000 } })
-        // .find({price: {$gt: 2000},name:'Samsung S6'})
-        // .or([{price: {$gt: 2000},name:'Samsung S6'}])
-        // .find({name:/^Samsung/}) starts with
-        // .find({name:/Samsung$/}) ends with
-        // .find({ name: /.*Samsung.*/ }) contains
-
         .then(products => {
-
             Category.find()
                 .then(categories => {
                     res.render('shop/products', {
@@ -82,7 +87,7 @@ exports.getProductsByCategoryId = (req, res, next) => {
     const categoryid = req.params.categoryid;
 
 
-    Product.findByCategoryId(categoryid)
+    Product.find({ categories: categoryid })
         .then(products => {
             Category.find()
                 .then(categories => {
@@ -105,6 +110,7 @@ exports.getProductsByCategoryId = (req, res, next) => {
 exports.getProduct = (req, res, next) => {
 
     Product.findById(req.params.productid)
+        .populate('categories', 'name')
         .then(product => {
             res.render('shop/product-detail', {
                 title: product.name,
@@ -119,24 +125,29 @@ exports.getProduct = (req, res, next) => {
 
 
 exports.getCart = (req, res, next) => {
-    req.user.getCart()
-        .then(products => {
+    req.user
+        .populate('cart.items.productId')
+        .execPopulate()
+        .then(user => {
+            console.log(user.cart.items);
             res.render('shop/cart', {
                 title: 'Cart',
                 path: '/cart',
                 action: req.query.action,
-                products: products
+                products: user.cart.items
             })
         })
         .catch(err => console.log(err));
+
+
 }
 
 exports.postCart = (req, res, next) => {
 
     const productId = req.body.productId;
     Product
-        //.findById(productId)
-        .findOne({ _id: req.params.productid })
+        .findById(productId)
+        // .findOne({ _id: req.params.productid })
         .then(product => {
             return req.user.addToCart(product);
         })
