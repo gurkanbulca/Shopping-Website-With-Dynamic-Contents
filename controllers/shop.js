@@ -1,5 +1,6 @@
 const Product = require('../models/product');
 const Category = require('../models/category');
+const Order = require('../models/order');
 
 
 // eq (equal)
@@ -170,14 +171,18 @@ exports.postCartItemDelete = (req, res, next) => {
 
 exports.getOrders = (req, res, next) => {
 
-    req.user.getOrders()
-        .then(orders => {
-            res.render('shop/orders', {
-                title: 'Orders',
-                path: '/orders',
-                orders: orders
-            });
-        })
+    Order.find({"user.userId":req.user._id})
+    .then(orders=>{
+        console.log(orders);
+        res.render('shop/orders', {
+            title: 'Orders',
+            path: '/orders',
+            orders: orders
+        });
+    })
+    .catch(err=>console.log(err));
+    
+
 
 
 
@@ -185,6 +190,41 @@ exports.getOrders = (req, res, next) => {
 }
 
 exports.postOrder = (req, res, next) => {
+    req.user
+    .populate('cart.items.productId')
+    .execPopulate()
+    .then(user=>{
+        const order = new Order({
+            user:{
+                userId: req.user._id,
+                name: req.user.name,
+                email: req.user.email
+            },
+            items: user.cart.items.map(p=>{
+                
+                
+                return {
+                    product:{
+                        _id:p.productId._id,
+                        name: p.productId.name,
+                        price: p.productId.price,
+                        imageUrl: p.productId.imageUrl
+                    },
+                    quantity: p.quantity
+                };
+            })
+        })
+
+        return order.save();
+    })
+    .then(()=>{
+        return req.user.clearCart();
+    })
+    .then(()=>{
+        res.redirect('/order');
+    })
+    .catch(err=>console.log(err));
+    
     req.user.addOrder()
         .then(() => {
             res.redirect('/cart');
