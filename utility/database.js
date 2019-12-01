@@ -4,7 +4,7 @@ const mongodb = require('mongodb');
 const MongoClient = mongodb.MongoClient;
 
 const mongoConnect = (callback) => {
-    MongoClient.connect('mongodb://localhost/node-app')
+    MongoClient.connect('mongodb://localhost/node-app',{ useNewUrlParser: true })
         .then(client => {
             console.log('connected');
             _db = client.db();

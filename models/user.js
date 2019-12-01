@@ -1,6 +1,8 @@
-const Product = require('./product');
+const Order = require('./order');
 
 const mongoose = require('mongoose');
+
+
 
 const userSchema = mongoose.Schema({
     name: {
@@ -15,6 +17,8 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    resetToken: String,
+    resetTokenExpiration: Date,
     cart: {
         items: [
             {
@@ -72,6 +76,7 @@ userSchema.methods.clearCart = function(){
     this.cart = {items:[]};
     return this.save();
 }
+
 
 module.exports = mongoose.model('User', userSchema);
 

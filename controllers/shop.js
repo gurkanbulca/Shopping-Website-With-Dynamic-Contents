@@ -29,7 +29,6 @@ const Order = require('../models/order');
 exports.getIndex = (req, res, next) => {
 
     // console.log(req.cookies.isAuthenticated);
-    console.log(req.session.isAuthenticated);
 
 
     Product.find()
@@ -40,25 +39,12 @@ exports.getIndex = (req, res, next) => {
                         title: 'Shopping',
                         products: products,
                         categories: categories,
-                        isAuthenticated: req.session.isAuthenticated,
                         path: '/'
                     });
                 })
 
 
 
-            // Category.find()
-            //     .then(categories => {
-            //         res.render('shop/index', {
-            //             title: 'Shopping',
-            //             products: products,
-            //             categories: categories,
-            //             path: '/'
-            //         });
-            //     })
-            //     .catch((err) => {
-            //         console.log(err);
-            //     });
         })
         .catch((err) => {
             console.log(err);
@@ -77,7 +63,6 @@ exports.getProducts = (req, res, next) => {
                         title: 'Products',
                         products: products,
                         categories: categories,
-                        isAuthenticated: req.session.isAuthenticated,
                         path: '/products'
                     });
                 })
@@ -103,7 +88,6 @@ exports.getProductsByCategoryId = (req, res, next) => {
                         products: products,
                         categories: categories,
                         selectedCategory: categoryid,
-                        isAuthenticated: req.session.isAuthenticated,
                         path: '/products'
                     });
                 })
@@ -123,7 +107,6 @@ exports.getProduct = (req, res, next) => {
             res.render('shop/product-detail', {
                 title: product.name,
                 product: product,
-                isAuthenticated: req.session.isAuthenticated,
                 path: '/products'
             });
         })
@@ -138,12 +121,10 @@ exports.getCart = (req, res, next) => {
         .populate('cart.items.productId')
         .execPopulate()
         .then(user => {
-            console.log(user.cart.items);
             res.render('shop/cart', {
                 title: 'Cart',
                 path: '/cart',
                 action: req.query.action,
-                isAuthenticated: req.session.isAuthenticated,
                 products: user.cart.items
             })
         })
@@ -179,14 +160,11 @@ exports.postCartItemDelete = (req, res, next) => {
 }
 
 exports.getOrders = (req, res, next) => {
-
     Order.find({ "user.userId": req.user._id })
         .then(orders => {
-            console.log(orders);
             res.render('shop/orders', {
                 title: 'Orders',
                 path: '/orders',
-                isAuthenticated: req.session.isAuthenticated,
                 orders: orders
             });
         })
@@ -231,15 +209,11 @@ exports.postOrder = (req, res, next) => {
             return req.user.clearCart();
         })
         .then(() => {
-            res.redirect('/order');
+            res.redirect('/orders');
         })
         .catch(err => console.log(err));
 
-    req.user.addOrder()
-        .then(() => {
-            res.redirect('/cart');
-        })
-        .catch(err => console.log(err));
+
 
 }
 

@@ -11,12 +11,11 @@ exports.getProducts = (req, res, next) => {
         .populate('userId', 'name -_id')
         .select('name price userId imageUrl')
         .then(products => {
-            console.log(products);
+            // console.log(products);
             res.render('admin/products', {
                 title: 'Admin Products',
                 products: products,
                 path: '/admin/products',
-                isAuthenticated: req.session.isAuthenticated,
                 action: req.query.action
             });
         })
@@ -26,12 +25,12 @@ exports.getProducts = (req, res, next) => {
 }
 
 exports.getAddProduct = (req, res, next) => {
+    
     Category.find()
         .then(categories => {
             res.render('admin/add-product', {
                 title: 'New Product',
                 path: '/admin/add-product',
-                isAuthenticated: req.session.isAuthenticated,
                 categories: categories
             });
         })
@@ -69,10 +68,10 @@ exports.postAddProduct = (req, res, next) => {
 }
 
 exports.getEditProduct = (req, res, next) => {
-
+    
     Product.findById(req.params.productid)
         .then(product => {
-            console.log(product);
+            // console.log(product);
             return product;
 
 
@@ -97,7 +96,6 @@ exports.getEditProduct = (req, res, next) => {
                         title: 'Edit Product',
                         path: '/admin/products',
                         product: product,
-                        isAuthenticated: req.session.isAuthenticated,
                         categories: categories
                     });
                 })
@@ -169,8 +167,7 @@ exports.postDeleteProduct = (req, res, next) => {
 exports.getAddCategory = (req, res, next) => {
     res.render('admin/add-category', {
         title: 'New Category',
-        isAuthenticated: req.session.isAuthenticated,
-        path: '/admin/add-category'
+        path: '/admin/add-category',
     });
 }
 
@@ -191,7 +188,6 @@ exports.getCategories = (req, res, next) => {
                 title: 'Categories',
                 path: '/admin/categories',
                 categories: categories,
-                isAuthenticated: req.session.isAuthenticated,
                 action: req.query.action
             });
         })
@@ -205,7 +201,6 @@ exports.getEditCategory = (req, res, next) => {
             res.render('admin/edit-category', {
                 title: 'Edit Category',
                 path: 'admin/categories',
-                isAuthenticated: req.session.isAuthenticated,
                 category: category
 
             });

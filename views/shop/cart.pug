@@ -27,6 +27,7 @@ block content
                         td #{product.quantity}
                         td 
                             form(action='/delete-cartitem' method='POST')
+                                input(type="hidden" name="_csrf" value=`${csrfToken}`)
                                 input(type='hidden' name='productid' value=`${product.productId._id}`)
                                 button(type='submit').btn.btn-danger.btn-sm Delete
 
@@ -41,6 +42,7 @@ block content
         .text-center
             a(href="/").btn.btn-primary Alışverişe Devam Et
             form(action="/create-order" method="POST" style="display:inline-block;")
+                input(type="hidden" name="_csrf" value=`${csrfToken}`)
                 button(type="submit").btn.btn-primary.ml-2 Alışverişi Tamamla
     else
         h1 No Products  

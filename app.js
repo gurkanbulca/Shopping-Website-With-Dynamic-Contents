@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const mongoDbStore = require('connect-mongodb-session')(session);
+const csurf = require('csurf');
 
 
 app.set('view engine', 'pug');
@@ -48,18 +49,18 @@ app.use((req, res, next) => {
 
     User.findById(req.session.user._id)
         .then(user => {
+            // console.log(user);
             req.user = user
             next();
         })
         .catch(err => console.log(err));
 })
 
-
+app.use(csurf());
 
 app.use('/admin', adminRoutes);
 app.use(userRoutes);
 app.use(accountRoutes);
-
 app.use(errorController.get404Page);
 
 
