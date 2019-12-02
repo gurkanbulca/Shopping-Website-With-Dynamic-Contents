@@ -3,7 +3,8 @@ const bcrypt = require("bcrypt");
 const sgMail = require('@sendgrid/mail');
 const crypto = require('crypto');
 
-sgMail.setApiKey("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");
+var apiKey = require("../private/sendgrid");
+sgMail.setApiKey(apiKey);
 
 exports.getLogin = (req, res, next) => {
     var errorMessage = req.session.errorMessage;

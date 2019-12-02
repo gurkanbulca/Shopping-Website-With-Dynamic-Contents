@@ -28,6 +28,7 @@ var store = new mongoDbStore({
     collection: 'mySessions'
 })
 
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(session({
