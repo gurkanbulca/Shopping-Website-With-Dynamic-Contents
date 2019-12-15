@@ -31,7 +31,14 @@ exports.getAddProduct = (req, res, next) => {
             res.render('admin/add-product', {
                 title: 'New Product',
                 path: '/admin/add-product',
-                categories: categories
+                categories: categories,
+                inputs: {
+                    name: "",
+                    price: "",
+                    imageUrl: "",
+                    description: "",
+                    categories: categories
+                }
             });
         })
 
@@ -52,7 +59,10 @@ exports.postAddProduct = (req, res, next) => {
             imageUrl: imageUrl,
             description: description,
             userId: req.user,
-            categories: categoryids
+            categories: categoryids,
+            isActive: false,
+            // category:'telefon',
+            tags: ['akıllı telefon']
         }
     );
 
@@ -61,16 +71,59 @@ exports.postAddProduct = (req, res, next) => {
             res.redirect('/admin/products?action=add');
         })
         .catch(err => {
-            console.log(err);
+            let message = '';
+            if (err.name == 'ValidationError') {
+                for (field in err.errors) {
+                    message += err.errors[field].message + "<br>";
+                }
+                Category.find()
+                    .then((categories) => {
+                        categories.map(category => {
+                            console.log(typeof categoryids);
+                            if (typeof categoryids == 'object') {
+                                for (let i = 0; i < categoryids.length; i++) {
+                                    if (categoryids[i] == category._id) {
+                                        category.selected = true;
+                                    }
+                                }
+                            }
+                            else {
+                                if (categoryids == category._id) {
+                                    category.selected = true;
+                                }
+                            }
+
+                            return category;
+                        });
+                        res.render('admin/add-product', {
+                            title: 'New Product',
+                            path: '/admin/add-product',
+                            categories: categories,
+                            errorMessage: message,
+                            inputs: {
+                                name: name,
+                                price: price,
+                                imageUrl: imageUrl,
+                                description: description,
+                                categories: categories
+                            }
+                        }).catch((err) => {
+                            console.log(err);
+                        });
+
+                    });
+            }
+
+
+
+
         });
-
-
 }
 
 exports.getEditProduct = (req, res, next) => {
 
     Product
-    .findOne({ _id: req.params.productid, userId: req.user._id })
+        .findOne({ _id: req.params.productid, userId: req.user._id })
         .then(product => {
             // console.log(product);
             return product;
@@ -156,9 +209,9 @@ exports.postDeleteProduct = (req, res, next) => {
 
     const id = req.body.productid;
 
-    Product.deleteOne({ _id: id,userId:req.user._id })
+    Product.deleteOne({ _id: id, userId: req.user._id })
         .then(result => {
-            if(result.deletedCount===0){
+            if (result.deletedCount === 0) {
                 return res.redirect('/');
             }
             res.redirect('/admin/products?action=delete');

@@ -1,6 +1,7 @@
 const Order = require('./order');
 
 const mongoose = require('mongoose');
+const {isEmail} = require('validator');
 
 
 
@@ -11,7 +12,7 @@ const userSchema = mongoose.Schema({
     },
     email: {
         type: String,
-        required: true
+        validate:[isEmail,'invalid email']
     },
     password:{
         type: String,
