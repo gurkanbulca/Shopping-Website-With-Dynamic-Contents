@@ -4,6 +4,9 @@ module.exports = (req, res, next) => {
         return res.redirect('/login');
     }
 
-    
+    if (req.session.user && !req.session.user.isAdmin) {
+        return res.render('error/authError');
+    }
     next();
+
 }

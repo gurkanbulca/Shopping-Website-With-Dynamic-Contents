@@ -44,13 +44,14 @@ app.use(session({
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res, next) => {
+    // console.log(req.session);
     if(!req.session.user){
         return next();
     }
 
     User.findById(req.session.user._id)
         .then(user => {
-            // console.log(user);
+            res.locals.isAdmin = user.isAdmin;
             req.user = user
             next();
         })
